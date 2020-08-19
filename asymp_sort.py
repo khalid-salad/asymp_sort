@@ -1,55 +1,50 @@
 #!/usr/bin/env python3
 
-import sympy as sym
 import random
 
-
-def quick_sort(array, cmp, *args):
-    if len(array) == 0:
-        return array
-    else:
-        pivot = random.choice(array)
-        L, P, R = [], [], []
-        for ele in array:
-            val = cmp(ele, pivot, *args)
-            if val == -1:
-                L.append(ele)
-            elif val == 0:
-                P.append(ele)
-            else:
-                R.append(ele)
-        return quick_sort(L, cmp, *args) + P + quick_sort(R, cmp, *args)
+import sympy as sym
 
 
-def bigO(f1, f2, var):
-    limit = sym.limit(f1 / f2, var, sym.oo)
-    if limit < sym.oo:
-        if limit > 0:
-            return 0
+class AsympFunc:
+    def __init__(self, func, var, name=None, string_rep=None):
+        self.func = func
+        self.var = var
+        self.name = name
+        self.string_rep = string_rep
+        self.cache = {}
+
+    def limit(self, other):
+        if other not in self.cache:
+            self.cache[other] = sym.limit(self.func / other.func, self.var, sym.oo)
+        return self.cache[other]
+
+    def __lt__(self, other):
+        return self.limit(other) == 0
+
+    def __repr__(self):
+        if not self.string_rep:
+            return str(self.func)
         else:
-            return -1
-    else:
-        return 1
+            return self.string_rep
 
 
 def main():
     n = sym.Symbol("n")
-    funcs = {
-        "n^3": n ** 3,
-        "n / log^2n": n / sym.log(n, 2) ** 2,
-        "nlogn": n * sym.log(n, 2),
-        "1.1^n": 1.1 ** n,
-        "1 / n^3": 1 / n ** 3,
-        "log^6n": sym.log(n, 2) ** 6,
-        "1 / n": 1 / n,
-        "2^logn": 2 ** sym.log(n, 2),
-        "n!": sym.factorial(n),
-        "n^loglogn": n ** (sym.log(sym.log(n, 2), 2)),
-        "2^sqrt(logn)": 2 ** (sym.log(n, 2) ** 0.5),
-        "n^(1 / logn)": n ** (1 / sym.log(n)),
-    }
-    func_labels = [key for key in funcs]
-    print(quick_sort(func_labels, lambda p, q: bigO(funcs[p], funcs[q], n)))
+    funcs = [
+        AsympFunc(n ** 3, n, string_rep="n^3"),
+        AsympFunc(n / sym.log(n, 2) ** 2, n, string_rep="n / log^2n"),
+        AsympFunc(n * sym.log(n, 2), n, string_rep="nlogn"),
+        AsympFunc(1.1 ** n, n, string_rep="1.1^n"),
+        AsympFunc(1 / n ** 3, n, string_rep="1 / n^3"),
+        AsympFunc(sym.log(n, 2) ** 6, n, string_rep="log^6n"),
+        AsympFunc(1 / n, n, string_rep="1 / n"),
+        AsympFunc(2 ** sym.log(n, 2), n, string_rep="2^logn"),
+        AsympFunc(sym.factorial(n), n, string_rep="n!"),
+        AsympFunc(n ** (sym.log(sym.log(n, 2), 2)), n, string_rep="n^loglogn"),
+        AsympFunc(2 ** (sym.log(n, 2) ** 0.5), n, string_rep="2^sqrt(logn)"),
+        AsympFunc(n ** (1 / sym.log(n)), n, string_rep="n^(1 / logn)"),
+    ]
+    print(sorted(funcs))
 
 
 if __name__ == "__main__":
