@@ -1,2 +1,2 @@
 # asymp_sort
-Code that takes functions and sorts them by asymptotic growth.
+Sort functions by asymptotic growth.
